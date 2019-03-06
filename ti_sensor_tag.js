@@ -1,44 +1,7 @@
-// Move this to index.js
 /**
  * @author Trieu Vi Tran - 15800120
  * @version 0.2.0
  */
-
- /**
-  * Waiting for site to load before running
-  */
-window.onload = function() {
-    let conButton = document.getElementById('connect');
-    let disButton = document.getElementById('disconnect');
-    
-    // Check if browser support Web bluetooth API
-    if ('bluetooth' in navigator === false) {
-        //button.style.display = 'none';
-        //message.innerHTML = 'Browser does not support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API" target="_blank">Web Bluetooth API</a>';
-    }
-
-    let ti_sensortag;
-    let data;
-
-    conButton.onclick = e => {
-        ti_sensortag = new TISensorTag();
-        ti_sensortag.connect();
-
-        ti_sensortag.onStateChange(state => {
-            //code
-
-            displayData();
-        })
-    }
-
-    function displayData() {
-        //code
-    }
-
-    disButton.onclick = e => {
-        //code
-    }
-}
 
 const services = {
     deviceInfo: {
@@ -97,15 +60,17 @@ let options = {
     optionalServices: [services.deviceInfo.uuid]
 };
 
+var self;
 var state = {};
 
 class TISensorTag {
     constructor() {
+        self = this;
         this.device;
         this.server;
         this.name;
         this.modelName;
-        this.temperature;
+        this.temperatureC;
         this.services = services;
         this.characteristics = characteristics;
     }
@@ -115,15 +80,14 @@ class TISensorTag {
         .then(device => {
             console.log('Found device');
             //code
-            this.device = device;
-            this.name = device.name;
+            self.device = device;
+            self.name = device.name;
             return device.gatt.connect();
         })
         .then(server => {
             console.log('Connect to server');
-            this.server = server;
-            this.getServices();
-            //code
+            self.server = server;
+            self.getServices(self.server, [self.services.deviceInfo, self.services.irTemp], [self.characteristics.deviceInfo.modelName, self.characteristics.irTemp.data, self.characteristics.irTemp.config, self.characteristics.irTemp.period]);
         })
         .catch(error => {
             console.trace('Error: ' + error);
@@ -131,75 +95,164 @@ class TISensorTag {
     }
 
     disconnect() {
-        this.server.disconnect();
+        self.server.disconnect();
     }
 
-    getServices() {
-        getModelName();
+    getServices(server, services, characteristics) {
+        getModelName(server, services[0], characteristics[0]);
+        getIRTemperature(server, services[1], characteristics.slice(1));
     }
 
-    getChar() {
-        //code
-    }
-
-    getModelName() {
-        this.server.getPrimaryService(this.services.deviceInfo.uuid)
+    getIRTemperature(server, service, chars) {
+        server.getPrimaryService(service)
         .then(service => {
-            service.getCharacteristic(this.characteristics.deviceInfo.modelName.uuid);
-        });
-    }
-
-    handleTempChange(event) {
-        //code
-    }
-
-    convertoTemp(v1, v2) {
-        //code
-    }
-
-}
-
-
-
-function onScanButtonClick() {
-    let options = {
-        acceptAllDevices: true,
-        optionalServices: [services.deviceInfo.uuid]
-    };
-
-    navigator.bluetooth.requestDevice(options)
-        .then(device => {
-            console.log(device);
-            console.log('Request Device')
-            return device.gatt.connect();
+            irControl(service, chars[1]);
+            irPeriod(service, chars[2]);
+            irData(service, chars[0]);
         })
-        .then(server => {
-            console.log(server);
-            console.log('Try to get services')
-            return server.getPrimaryService(services.deviceInfo.uuid);
+        .catch(error => {
+            console.trace('Error: ' + e);
         })
-        .then(service =>{
-            console.log(service);
-            console.log('Try get characteristic')
-            return service.getCharacteristic(characteristics.deviceInfo.modelName.uuid);
+        
+    }
+
+    irControl(service, char) {
+        service.getCharacteristic(char.uuid)
+        .then(char => {
+            var commandValue = new Uint8Array([0x01]);
+            return char.writeValue(commandValue);
+        })
+        .then(value => {
+            console.log(value);
+        })
+        .catch(error => {
+            console.trace('Error: ' + e);
+        })
+    }
+
+    irPeriod(service, char) {
+        service.getCharacteristic(char.uuid)
+        .then(char => {
+            var commandValue = new Uint8Array([0x64]);
+            return char.writeValue(commandValue);
+        })
+        .then(value => {
+            console.log(value);
+        })
+        .catch(error => {
+            console.trace('Error: ' + e);
+        })
+    }
+
+    irData(service, char) {
+        service.getCharacteristic(char.uuid)
+        .then(char => {
+            char.startNotifications().then(res => {
+                char.addEventListener('characteristicvaluechanged', self.handleTempChange);
+            });
+        })
+        .catch(error => {
+            console.trace('Error: ' + e);
+        })
+    }
+
+    getModelName(server, service, char) {
+        server.getPrimaryService(service.uuid)
+        .then(service => {
+            return service.getCharacteristic(char.uuid);
         })
         .then(char => {
-            console.log('Got characteristic')
-            console.log(char);
             return char.readValue();
         })
         .then(values => {
-            console.log(values);
             let temp = '';
             for (var i = 0; i < 16; i++) {
                 temp += String.fromCharCode(values.getUint8(i));
             }
-            console.log(temp);
+            self.modelName = temp;
+
+            state.modelName = temp;
+            console.log(self.modelName);
+
+            self.onStateChangeCallback(state);
         })
         .catch(error => {
-            console.log('Error: ' + error);
+            console.trace('Error: ' + error);
         });
+    }
+
+    handleTempChange(event) {
+        // byteLength of ir data is 4
+        // v1 = getUint8(3) must be length 2
+        // v2 = getUint8(2) must be length 2
+        // data = parseInt('0x' + v1.toString(16) + v2.toString(16), 16)
+        // result = (t >> 2 & 0x3FFF) * 0.03125
+        let raw_data = event.target.value;
+
+        let temp1 = raw_data.getUint(3).toString(16);
+        temp1 = temp1.length < 2 ? '0' + temp1 : temp1;
+
+        let temp2 = raw_data.getUint(2).toString(16);
+        temp2 = temp2.length < 2 ? '0' + temp2 : temp2;
+
+        let raw_ambient_temp = parseInt('0x' + temp1 + temp2, 16);
+        let ambient_temp_int = raw_ambient_temp >> 2 & 0x3FFF;
+        self.temperatureC = ambient_temp_int * 0.03125;
+        
+        state.tempC = self.temperatureC;
+        console.log(self.temperatureC);
+
+        self.onStateChangeCallback(state);
+    }
+
+    onStateChangeCallback() {}
+
+    onStateChange(callback){
+        self.onStateChangeCallback = callback;
+    }
 }
+
+
+
+// function onScanButtonClick() {
+//     let options = {
+//         acceptAllDevices: true,
+//         optionalServices: [services.deviceInfo.uuid]
+//     };
+
+//     navigator.bluetooth.requestDevice(options)
+//         .then(device => {
+//             console.log(device);
+//             console.log('Request Device')
+//             return device.gatt.connect();
+//         })
+//         .then(server => {
+//             console.log(server);
+//             console.log('Try to get services')
+//             return server.getPrimaryService(services.deviceInfo.uuid);
+//         })
+//         .then(service =>{
+//             console.log(service);
+//             console.log('Try get characteristic')
+//             return service.getCharacteristic(characteristics.deviceInfo.modelName.uuid);
+//         })
+//         .then(char => {
+//             console.log('Got characteristic')
+//             console.log(char);
+//             return char.readValue();
+//         })
+//         .then(values => {
+//             console.log(values);
+//             let temp = '';
+//             for (var i = 0; i < 16; i++) {
+//                 temp += String.fromCharCode(values.getUint8(i));
+//             }
+//             console.log(temp);
+//         })
+//         .catch(error => {
+//             console.log('Error: ' + error);
+//         });
+// }
 
 // Turn data into ambient temperature
 // var t = parseInt('0x0be4', 16);
