@@ -1,3 +1,45 @@
+// Move this to index.js
+/**
+ * @author Trieu Vi Tran - 15800120
+ * @version 0.2.0
+ */
+
+ /**
+  * Waiting for site to load before running
+  */
+window.onload = function() {
+    let conButton = document.getElementById('connect');
+    let disButton = document.getElementById('disconnect');
+    
+    // Check if browser support Web bluetooth API
+    if ('bluetooth' in navigator === false) {
+        //button.style.display = 'none';
+        //message.innerHTML = 'Browser does not support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API" target="_blank">Web Bluetooth API</a>';
+    }
+
+    let ti_sensortag;
+    let data;
+
+    conButton.onclick = e => {
+        ti_sensortag = new TISensorTag();
+        ti_sensortag.connect();
+
+        ti_sensortag.onStateChange(state => {
+            //code
+
+            displayData();
+        })
+    }
+
+    function displayData() {
+        //code
+    }
+
+    disButton.onclick = e => {
+        //code
+    }
+}
+
 const services = {
     deviceInfo: {
         name: 'Device Information Service',
@@ -26,12 +68,12 @@ const characteristics = {
             uuid: 'f000aa01-0451-4000-b000-000000000000'
         },
         config: {
-            name: '',
-            uuid: ''
+            name: 'IR Temperature Configuration',
+            uuid: 'f000aa02-0451-4000-b000-000000000000'
         },
         period: {
-            name: '',
-            uuid: ''
+            name: 'IR Temperature Period',
+            uuid: 'f000aa03-0451-4000-b000-000000000000'
         }
     },
     humidity: {
@@ -40,26 +82,90 @@ const characteristics = {
             uuid: 'f000aa21-0451-4000-b000-000000000000'
         },
         config: {
-            name: '',
-            uuid: ''
+            name: 'Humidity Configuration',
+            uuid: 'f000aa22-0451-4000-b000-000000000000'
         },
         period: {
-            name: '',
-            uuid: ''
+            name: 'Humidity Period',
+            uuid: 'f000aa23-0451-4000-b000-000000000000'
         }
     }
 }
+
+let options = {
+    acceptAllDevices: true,
+    optionalServices: [services.deviceInfo.uuid]
+};
+
+var state = {};
+
+class TISensorTag {
+    constructor() {
+        this.device;
+        this.server;
+        this.name;
+        this.modelName;
+        this.temperature;
+        this.services = services;
+        this.characteristics = characteristics;
+    }
+
+    connect() {
+        return navigator.bluetooth.requestDevice(options)
+        .then(device => {
+            console.log('Found device');
+            //code
+            this.device = device;
+            this.name = device.name;
+            return device.gatt.connect();
+        })
+        .then(server => {
+            console.log('Connect to server');
+            this.server = server;
+            this.getServices();
+            //code
+        })
+        .catch(error => {
+            console.trace('Error: ' + error);
+        })
+    }
+
+    disconnect() {
+        this.server.disconnect();
+    }
+
+    getServices() {
+        getModelName();
+    }
+
+    getChar() {
+        //code
+    }
+
+    getModelName() {
+        this.server.getPrimaryService(this.services.deviceInfo.uuid)
+        .then(service => {
+            service.getCharacteristic(this.characteristics.deviceInfo.modelName.uuid);
+        });
+    }
+
+    handleTempChange(event) {
+        //code
+    }
+
+    convertoTemp(v1, v2) {
+        //code
+    }
+
+}
+
+
 
 function onScanButtonClick() {
     let options = {
         acceptAllDevices: true,
         optionalServices: [services.deviceInfo.uuid]
     };
-
-    var handleValueChange = (event) => {
-        let data = event.target.value;
-        console.log(data.getInt8(0));
-    }
 
     navigator.bluetooth.requestDevice(options)
         .then(device => {
@@ -75,7 +181,7 @@ function onScanButtonClick() {
         .then(service =>{
             console.log(service);
             console.log('Try get characteristic')
-            //return service.getCharacteristic(characteristics.deviceInfoModelName.uuid);
+            return service.getCharacteristic(characteristics.deviceInfo.modelName.uuid);
         })
         .then(char => {
             console.log('Got characteristic')
