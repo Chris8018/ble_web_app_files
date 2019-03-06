@@ -57,7 +57,7 @@ const characteristics = {
 
 let options = {
     acceptAllDevices: true,
-    optionalServices: [services.deviceInfo.uuid]
+    optionalServices: [services.deviceInfo.uuid, services.irTemp.uuid]
 };
 
 var self;
@@ -95,68 +95,85 @@ class TISensorTag {
     }
 
     disconnect() {
+        console.log('Disconnect device');
         self.server.disconnect();
     }
 
     getServices(server, services, characteristics) {
-        getModelName(server, services[0], characteristics[0]);
-        getIRTemperature(server, services[1], characteristics.slice(1));
+        self.getModelName(server, services[0], characteristics[0]);
+        self.getIRTemperature(server, services[1], characteristics.slice(1));
+        //self.getIRTemperature(server, services[1], characteristics[1]);
     }
 
     getIRTemperature(server, service, chars) {
-        server.getPrimaryService(service)
+        console.log('Get IR Temp Data')
+        server.getPrimaryService(service.uuid)
         .then(service => {
-            irControl(service, chars[1]);
-            irPeriod(service, chars[2]);
-            irData(service, chars[0]);
+            // self.irControl(service, chars[1]);
+            // self.irPeriod(service, chars[2]);
+            //self.irData(service, chars[0]);
+            console.log('Enable Temperature scanning');
+            service.getCharacteristic(chars[1].uuid).then(charConfig => {
+                var value = new Uint8Array([0x01]);
+                charConfig.writeValue(value);
+            });
+
+            console.log('Retrieve Temperature Data');
+            service.getCharacteristic(chars[0].uuid)
+            .then(charData => {
+                charData.startNotifications().then(_ => {
+                    charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
+                });
+            });
         })
         .catch(error => {
-            console.trace('Error: ' + e);
+            console.trace('Error: ' + error);
         })
         
     }
 
-    irControl(service, char) {
-        service.getCharacteristic(char.uuid)
-        .then(char => {
-            var commandValue = new Uint8Array([0x01]);
-            return char.writeValue(commandValue);
-        })
-        .then(value => {
-            console.log(value);
-        })
-        .catch(error => {
-            console.trace('Error: ' + e);
-        })
-    }
+    // irControl(service, char) {
+    //     service.getCharacteristic(char.uuid)
+    //     .then(char => {
+    //         var commandValue = new Uint8Array([0x01]);
+    //         return char.writeValue(commandValue);
+    //     })
+    //     .then(value => {
+    //         console.log(value);
+    //     })
+    //     .catch(error => {
+    //         console.trace('Error: ' + error);
+    //     })
+    // }
 
-    irPeriod(service, char) {
-        service.getCharacteristic(char.uuid)
-        .then(char => {
-            var commandValue = new Uint8Array([0x64]);
-            return char.writeValue(commandValue);
-        })
-        .then(value => {
-            console.log(value);
-        })
-        .catch(error => {
-            console.trace('Error: ' + e);
-        })
-    }
+    // irPeriod(service, char) {
+    //     service.getCharacteristic(char.uuid)
+    //     .then(char => {
+    //         var commandValue = new Uint8Array([0x64]);
+    //         return char.writeValue(commandValue);
+    //     })
+    //     .then(value => {
+    //         console.log(value);
+    //     })
+    //     .catch(error => {
+    //         console.trace('Error: ' + error);
+    //     })
+    // }
 
-    irData(service, char) {
-        service.getCharacteristic(char.uuid)
-        .then(char => {
-            char.startNotifications().then(res => {
-                char.addEventListener('characteristicvaluechanged', self.handleTempChange);
-            });
-        })
-        .catch(error => {
-            console.trace('Error: ' + e);
-        })
-    }
+    // irData(service, char) {
+    //     service.getCharacteristic(char.uuid)
+    //     .then(char => {
+    //         char.startNotifications().then(res => {
+    //             char.addEventListener('characteristicvaluechanged', self.handleTempChange);
+    //         });
+    //     })
+    //     .catch(error => {
+    //         console.trace('Error: ' + error);
+    //     })
+    // }
 
     getModelName(server, service, char) {
+        console.log('Get Model Name')
         server.getPrimaryService(service.uuid)
         .then(service => {
             return service.getCharacteristic(char.uuid);
@@ -188,19 +205,20 @@ class TISensorTag {
         // data = parseInt('0x' + v1.toString(16) + v2.toString(16), 16)
         // result = (t >> 2 & 0x3FFF) * 0.03125
         let raw_data = event.target.value;
+        console.log(raw_data);
 
-        let temp1 = raw_data.getUint(3).toString(16);
+        let temp1 = raw_data.getUint8(3).toString(16);
         temp1 = temp1.length < 2 ? '0' + temp1 : temp1;
 
-        let temp2 = raw_data.getUint(2).toString(16);
+        let temp2 = raw_data.getUint8(2).toString(16);
         temp2 = temp2.length < 2 ? '0' + temp2 : temp2;
 
         let raw_ambient_temp = parseInt('0x' + temp1 + temp2, 16);
         let ambient_temp_int = raw_ambient_temp >> 2 & 0x3FFF;
-        self.temperatureC = ambient_temp_int * 0.03125;
+        let resultC = ambient_temp_int * 0.03125;
         
-        state.tempC = self.temperatureC;
-        console.log(self.temperatureC);
+        state.tempC = resultC;
+        console.log(resultC);
 
         self.onStateChangeCallback(state);
     }

@@ -16,7 +16,8 @@
   }
 
   let ti_sensortag;
-  let modelName, irTempc;
+  let modelName;
+  let irTempC;
 
   conButton.onclick = e => {
       ti_sensortag = new TISensorTag();
@@ -24,7 +25,7 @@
 
       ti_sensortag.onStateChange(state => {
           modelName = state.modelName;
-          irTempc = state.tempC;
+          irTempC = state.tempC;
 
           displayData();
       })
@@ -38,7 +39,7 @@
 
       if (irTempC) {
         let irTempdiv = document.getElementById('tempC');
-        irTempdiv.innerHTML = irTempc;
+        irTempdiv.innerHTML = irTempC;
       }
   }
 
