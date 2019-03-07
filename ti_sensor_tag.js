@@ -116,6 +116,9 @@ class TISensorTag {
             service.getCharacteristic(chars[1].uuid).then(charConfig => {
                 var value = new Uint8Array([0x01]);
                 charConfig.writeValue(value);
+            })
+            .catch(error => {
+                console.trace('Error: ' + error);
             });
 
             console.log('Retrieve Temperature Data');
@@ -124,6 +127,9 @@ class TISensorTag {
                 charData.startNotifications().then(_ => {
                     charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
                 });
+            })
+            .catch(error => {
+                console.trace('Error: ' + error);
             });
         })
         .catch(error => {
@@ -186,10 +192,10 @@ class TISensorTag {
             for (var i = 0; i < 16; i++) {
                 temp += String.fromCharCode(values.getUint8(i));
             }
-            self.modelName = temp;
+            //self.modelName = temp;
 
             state.modelName = temp;
-            console.log(self.modelName);
+            console.log(temp);
 
             self.onStateChangeCallback(state);
         })
@@ -229,63 +235,3 @@ class TISensorTag {
         self.onStateChangeCallback = callback;
     }
 }
-
-
-
-// function onScanButtonClick() {
-//     let options = {
-//         acceptAllDevices: true,
-//         optionalServices: [services.deviceInfo.uuid]
-//     };
-
-//     navigator.bluetooth.requestDevice(options)
-//         .then(device => {
-//             console.log(device);
-//             console.log('Request Device')
-//             return device.gatt.connect();
-//         })
-//         .then(server => {
-//             console.log(server);
-//             console.log('Try to get services')
-//             return server.getPrimaryService(services.deviceInfo.uuid);
-//         })
-//         .then(service =>{
-//             console.log(service);
-//             console.log('Try get characteristic')
-//             return service.getCharacteristic(characteristics.deviceInfo.modelName.uuid);
-//         })
-//         .then(char => {
-//             console.log('Got characteristic')
-//             console.log(char);
-//             return char.readValue();
-//         })
-//         .then(values => {
-//             console.log(values);
-//             let temp = '';
-//             for (var i = 0; i < 16; i++) {
-//                 temp += String.fromCharCode(values.getUint8(i));
-//             }
-//             console.log(temp);
-//         })
-//         .catch(error => {
-//             console.log('Error: ' + error);
-//         });
-// }
-
-// Turn data into ambient temperature
-// var t = parseInt('0x0be4', 16);
-
-// console.log(t);
-// var t2 = t >> 2 & 0x3FFF;
-// console.log(t2);
-// var t3 = t2 * 0.03125;
-// console.log(t3);
-
-// Hex to ASCII
-// function hex2a(hexx) {
-//     var hex = hexx.toString();//force conversion
-//     var str = '';
-//     for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
-//         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-//     return str;
-// }
