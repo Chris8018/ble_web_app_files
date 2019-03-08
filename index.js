@@ -12,7 +12,7 @@
   
   // Check if browser support Web bluetooth API
   if ('bluetooth' in navigator === false) {
-      alert('Browser does not support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API" target="_blank">Web Bluetooth API</a>');
+      alert('Browser does not support the Web Bluetooth API');
   }
 
   let ti_sensortag;

@@ -79,7 +79,6 @@ class TISensorTag {
         return navigator.bluetooth.requestDevice(options)
         .then(device => {
             console.log('Found device');
-            //code
             self.device = device;
             self.name = device.name;
             return device.gatt.connect();
@@ -102,7 +101,6 @@ class TISensorTag {
     getServices(server, services, characteristics) {
         self.getModelName(server, services[0], characteristics[0]);
         self.getIRTemperature(server, services[1], characteristics.slice(1));
-        //self.getIRTemperature(server, services[1], characteristics[1]);
     }
 
     getIRTemperature(server, service, chars) {
@@ -117,20 +115,14 @@ class TISensorTag {
                 var value = new Uint8Array([0x01]);
                 charConfig.writeValue(value);
             })
-            .catch(error => {
-                console.trace('Error: ' + error);
-            });
 
-            console.log('Retrieve Temperature Data');
-            service.getCharacteristic(chars[0].uuid)
-            .then(charData => {
-                charData.startNotifications().then(_ => {
-                    charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
-                });
-            })
-            .catch(error => {
-                console.trace('Error: ' + error);
-            });
+            // console.log('Retrieve Temperature Data');
+            // service.getCharacteristic(chars[0].uuid)
+            // .then(charData => {
+            //     charData.startNotifications().then(_ => {
+            //         charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
+            //     });
+            // })
         })
         .catch(error => {
             console.trace('Error: ' + error);
@@ -192,7 +184,6 @@ class TISensorTag {
             for (var i = 0; i < 16; i++) {
                 temp += String.fromCharCode(values.getUint8(i));
             }
-            //self.modelName = temp;
 
             state.modelName = temp;
             console.log(temp);
