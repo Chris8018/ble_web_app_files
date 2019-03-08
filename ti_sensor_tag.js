@@ -56,7 +56,10 @@ const characteristics = {
 }
 
 let options = {
-    acceptAllDevices: true,
+    //acceptAllDevices: true,
+	filters: [
+            {name: 'CC2650 SensorTag'}
+    ],
     optionalServices: [services.deviceInfo.uuid, services.irTemp.uuid]
 };
 
@@ -104,25 +107,31 @@ class TISensorTag {
     }
 
     getIRTemperature(server, service, chars) {
+        var cService;
         console.log('Get IR Temp Data')
         server.getPrimaryService(service.uuid)
         .then(service => {
             // self.irControl(service, chars[1]);
             // self.irPeriod(service, chars[2]);
             //self.irData(service, chars[0]);
+            cService = service;
             console.log('Enable Temperature scanning');
-            service.getCharacteristic(chars[1].uuid).then(charConfig => {
-                var value = new Uint8Array([0x01]);
-                charConfig.writeValue(value);
-            })
+            return cService.getCharacteristic(chars[1].uuid)
 
-            // console.log('Retrieve Temperature Data');
-            // service.getCharacteristic(chars[0].uuid)
-            // .then(charData => {
-            //     charData.startNotifications().then(_ => {
-            //         charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
-            //     });
-            // })
+            
+        })
+        .then(charConfig => {
+            var value = new Uint8Array([0x01]);
+            return charConfig.writeValue(value);
+        })
+        .then(_ => {
+            console.log('Retrieve Temperature Data');
+            return cService.getCharacteristic(chars[0].uuid)
+        })
+        .then(charData => {
+            charData.startNotifications().then(_ => {
+                charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
+            });
         })
         .catch(error => {
             console.trace('Error: ' + error);
