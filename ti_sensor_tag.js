@@ -107,26 +107,29 @@ class TISensorTag {
     }
 
     getIRTemperature(server, service, chars) {
-        var cService;
+        //var cService;
         console.log('Get IR Temp Data')
         server.getPrimaryService(service.uuid)
         .then(service => {
             // self.irControl(service, chars[1]);
             // self.irPeriod(service, chars[2]);
             //self.irData(service, chars[0]);
-            cService = service;
+            //cService = service;
             console.log('Enable Temperature scanning');
-            return cService.getCharacteristic(chars[1].uuid)
-
-            
+            return service.getCharacteristic(chars[1].uuid)
         })
         .then(charConfig => {
             var value = new Uint8Array([0x01]);
             return charConfig.writeValue(value);
         })
+        .catch(error => {
+            console.trace('Error: ' + error);
+        });
+
+        server.getPrimaryService(service.uuid)
         .then(_ => {
             console.log('Retrieve Temperature Data');
-            return cService.getCharacteristic(chars[0].uuid)
+            return service.getCharacteristic(chars[0].uuid)
         })
         .then(charData => {
             charData.startNotifications().then(_ => {
@@ -135,7 +138,7 @@ class TISensorTag {
         })
         .catch(error => {
             console.trace('Error: ' + error);
-        })
+        });
         
     }
 
