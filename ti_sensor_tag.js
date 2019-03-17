@@ -180,13 +180,14 @@ class TISensorTag {
         })
         .then(charData => {
             console.log('Enable notification for temperature');
-            charData.startNotifications().then(_ => {
+            charData.startNotifications()
+            .then(_ => {
                 charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
             });
         })
         .catch(error => {
             console.trace('Error: ' + error);
-        })  
+        });
     }
 
     getModelName(server, service, char) {
