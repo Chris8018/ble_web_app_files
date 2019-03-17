@@ -106,7 +106,7 @@ class TISensorTag {
         // May be something is wrong here
         // self.getModelName(server, services[0], characteristics[0]);
         // self.getIRTemperature(server, services[1], characteristics.slice(1));
-        server.getPrimaryService(services[0].uuid)
+        var something = await server.getPrimaryService(services[0].uuid)
         .then(service => {
             console.log('Get Model Name');
             return service.getCharacteristic(characteristics[0].uuid);
