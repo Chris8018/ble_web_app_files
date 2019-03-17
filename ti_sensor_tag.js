@@ -105,56 +105,60 @@ class TISensorTag {
     getServices(server, services, characteristics) {
         // May be something is wrong here
         // self.getModelName(server, services[0], characteristics[0]);
-        // self.getIRTemperature(server, services[1], characteristics.slice(1));
+        self.getIRTemperature(server, services[1], characteristics.slice(1));
 
         
-        return server.getPrimaryService(services[0].uuid)
-        .then(service => {
-            console.log('Get Model Name');
-            return service.getCharacteristic(characteristics[0].uuid);
-        })
-        .then(char => {
-            console.log('Read Model Name in Raw');
-            return char.readValue();
-        })
-        .then(values => {
-            console.log('Read Model Name');
-            let temp = '';
-            for (var i = 0; i < 16; i++) {
-                temp += String.fromCharCode(values.getUint8(i));
-            }
+        // return server.getPrimaryService(services[0].uuid)
+        // .then(service => {
+        //     console.log('Get Model Name');
+        //     return service.getCharacteristic(characteristics[0].uuid);
+        // })
+        // .then(char => {
+        //     console.log('Read Model Name in Raw');
+        //     return char.readValue();
+        // })
+        // .then(values => {
+        //     console.log('Read Model Name');
+        //     let temp = '';
+        //     for (var i = 0; i < 16; i++) {
+        //         temp += String.fromCharCode(values.getUint8(i));
+        //     }
 
-            state.modelName = temp;
-            console.log(temp);
+        //     state.modelName = temp;
+        //     console.log(temp);
 
-            self.onStateChangeCallback(state);
+        //     self.onStateChangeCallback(state);
 
-            console.log('Get IR Temp Data');
-            return server.getPrimaryService(services[1].uuid)
-        })
-        .then(service => {
-            self.cService = service;
-            console.log('Temperature Config');
-            return self.cService.getCharacteristic(characteristics[2].uuid);
-        })
-        .then(charConfig => {
-            console.log('Enable Temperature reading');
-            var value = new Uint8Array([0x01]);
-            charConfig.writeValue(value);
-        })
-        .then(_ => {
-            console.log('Retrieve Temperature Data');
-            return self.cService.getCharacteristic(characteristics[1].uuid);
-        })
-        .then(charData => {
-            console.log('Enable notification for temperature');
-            charData.startNotifications().then(_ => {
-                charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
-            });
-        })
-        .catch(error => {
-            console.trace('Error: ' + error);
-        });
+        //     console.log('Get IR Temp Data');
+        //     return server.getPrimaryService(services[1].uuid)
+        // })
+        // .then(service => {
+        //     self.cService = service;
+        //     console.log('Temperature Config');
+        //     return self.cService.getCharacteristic(characteristics[2].uuid);
+        // })
+        // .then(charConfig => {
+        //     console.log('Enable Temperature reading');
+        //     var value = new Uint8Array([0x01]);
+        //     charConfig.writeValue(value);
+        // })
+        // .then(_ => {
+        //     console.log('Retrieve Temperature Data');
+        //     return self.cService.getCharacteristic(characteristics[1].uuid);
+        // })
+        // .then(charData => {
+        //     console.log('Enable notification for temperature');
+        //     charData.startNotifications()
+        //     .then(_ => {
+        //         charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
+        //     })
+        //     .catch(error => {
+        //         console.trace('Error: ' + error);
+        //     });
+        // })
+        // .catch(error => {
+        //     console.trace('Error: ' + error);
+        // });
     }
 
     getIRTemperature(server, service, chars) {
