@@ -102,7 +102,7 @@ class TISensorTag {
         self.server.disconnect();
     }
 
-    getServices(server, services, characteristics) {
+    async getServices(server, services, characteristics) {
         // May be something is wrong here
         // self.getModelName(server, services[0], characteristics[0]);
         // self.getIRTemperature(server, services[1], characteristics.slice(1));
