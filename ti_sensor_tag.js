@@ -163,7 +163,7 @@ class TISensorTag {
         console.log('Get IR Temp Data');
         server.getPrimaryService(service.uuid)
         .then(service => {
-            consolelog('Temperature Config');
+            console.log('Temperature Config');
             self.cService = service;
             return self.cService.getCharacteristic(chars[1].uuid);
         })
