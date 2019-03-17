@@ -111,27 +111,36 @@ class TISensorTag {
         console.log('Get IR Temp Data')
         return server.getPrimaryService(service.uuid)
         .then(service => {
-            self.cService = service;
-            console.log('Enable Temperature scanning');
-            return self.cService.getCharacteristic(chars[1].uuid);
+            //self.cService = service;
+            console.log('Temperature Config');
+            //return self.cService.getCharacteristic(chars[1].uuid);
+            service.getCharacteristic(chars[1].uuid)
+            .then(charConfig => {
+                console.log('Enable Temperature scanning');
+                var value = new Uint8Array([0x01]);
+                charConfig.writeValue(value);
+            })
+            .catch(error => {
+                console.trace('Error: ' + error);
+            })
+
+            return service.getCharacteristic(chars[0].uuid)
         })
-        .then(charConfig => {
-            var value = new Uint8Array([0x01]);
-            return charConfig.writeValue(value);
-        })
-        .then(_ => {
-            console.log('Retrieve Temperature Data');
-            return self.cService.getCharacteristic(chars[0].uuid);
-        })
+        // .then(charConfig => {
+        //     var value = new Uint8Array([0x01]);
+        //     return charConfig.writeValue(value);
+        // })
+        // .then(_ => {
+        //     console.log('Retrieve Temperature Data');
+        //     return self.cService.getCharacteristic(chars[0].uuid);
+        // })
         .then(charData => {
             console.log('Enable notification for temperature');
             charData.startNotifications().then(_ => {
                 charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
             });
         })
-        .catch(error => {
-            console.trace('Error: ' + error);
-        })
+        
         
     }
 
