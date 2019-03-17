@@ -172,7 +172,7 @@ class TISensorTag {
         .then(charConfig => {
             console.log('Enable Temperature reading');
             var value = new Uint8Array([0x01]);
-            charConfig.writeValue(value);
+            return charConfig.writeValue(value);
         })
         .then(_ => {
             console.log('Retrieve Temperature Data');
