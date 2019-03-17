@@ -103,8 +103,8 @@ class TISensorTag {
     }
 
     getServices(server, services, characteristics) {
-        self.getModelName(server, services[0], characteristics[0]);
-        //self.getIRTemperature(server, services[1], characteristics.slice(1));
+        //self.getModelName(server, services[0], characteristics[0]);
+        self.getIRTemperature(server, services[1], characteristics.slice(1));
     }
 
     getIRTemperature(server, service, chars) {
