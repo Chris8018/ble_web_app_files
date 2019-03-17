@@ -104,17 +104,13 @@ class TISensorTag {
 
     getServices(server, services, characteristics) {
         self.getModelName(server, services[0], characteristics[0]);
-        self.getIRTemperature(server, services[1], characteristics.slice(1));
+        //self.getIRTemperature(server, services[1], characteristics.slice(1));
     }
 
     getIRTemperature(server, service, chars) {
-        //var cService;
         console.log('Get IR Temp Data')
         server.getPrimaryService(service.uuid)
         .then(service => {
-            // self.irControl(service, chars[1]);
-            // self.irPeriod(service, chars[2]);
-            //self.irData(service, chars[0]);
             self.cService = service;
             console.log('Enable Temperature scanning');
             return self.cService.getCharacteristic(chars[1].uuid);
@@ -128,6 +124,7 @@ class TISensorTag {
             return self.cService.getCharacteristic(chars[0].uuid);
         })
         .then(charData => {
+            console.log('Enable notification for temperature');
             charData.startNotifications().then(_ => {
                 charData.addEventListener('characteristicvaluechanged', self.handleTempChange);
             });
@@ -137,46 +134,6 @@ class TISensorTag {
         })
         
     }
-
-    // irControl(service, char) {
-    //     service.getCharacteristic(char.uuid)
-    //     .then(char => {
-    //         var commandValue = new Uint8Array([0x01]);
-    //         return char.writeValue(commandValue);
-    //     })
-    //     .then(value => {
-    //         console.log(value);
-    //     })
-    //     .catch(error => {
-    //         console.trace('Error: ' + error);
-    //     })
-    // }
-
-    // irPeriod(service, char) {
-    //     service.getCharacteristic(char.uuid)
-    //     .then(char => {
-    //         var commandValue = new Uint8Array([0x64]);
-    //         return char.writeValue(commandValue);
-    //     })
-    //     .then(value => {
-    //         console.log(value);
-    //     })
-    //     .catch(error => {
-    //         console.trace('Error: ' + error);
-    //     })
-    // }
-
-    // irData(service, char) {
-    //     service.getCharacteristic(char.uuid)
-    //     .then(char => {
-    //         char.startNotifications().then(res => {
-    //             char.addEventListener('characteristicvaluechanged', self.handleTempChange);
-    //         });
-    //     })
-    //     .catch(error => {
-    //         console.trace('Error: ' + error);
-    //     })
-    // }
 
     getModelName(server, service, char) {
         console.log('Get Model Name')
