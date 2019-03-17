@@ -1,0 +1,111 @@
+[1mdiff --git a/favicon.ico b/favicon.ico[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2998924[m
+Binary files /dev/null and b/favicon.ico differ
+[1mdiff --git a/ti_sensor_tag.js b/ti_sensor_tag.js[m
+[1mindex 6ca2d9c..18174f9 100644[m
+[1m--- a/ti_sensor_tag.js[m
+[1m+++ b/ti_sensor_tag.js[m
+[36m@@ -103,19 +103,74 @@[m [mclass TISensorTag {[m
+     }[m
+ [m
+     getServices(server, services, characteristics) {[m
+[31m-        //self.getModelName(server, services[0], characteristics[0]);[m
+[32m+[m[32m        // May be something is wrong here[m
+[32m+[m[32m        // self.getModelName(server, services[0], characteristics[0]);[m
+         self.getIRTemperature(server, services[1], characteristics.slice(1));[m
+[32m+[m
+[32m+[m[41m        [m
+[32m+[m[32m        // return server.getPrimaryService(services[0].uuid)[m
+[32m+[m[32m        // .then(service => {[m
+[32m+[m[32m        //     console.log('Get Model Name');[m
+[32m+[m[32m        //     return service.getCharacteristic(characteristics[0].uuid);[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(char => {[m
+[32m+[m[32m        //     console.log('Read Model Name in Raw');[m
+[32m+[m[32m        //     return char.readValue();[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(values => {[m
+[32m+[m[32m        //     console.log('Read Model Name');[m
+[32m+[m[32m        //     let temp = '';[m
+[32m+[m[32m        //     for (var i = 0; i < 16; i++) {[m
+[32m+[m[32m        //         temp += String.fromCharCode(values.getUint8(i));[m
+[32m+[m[32m        //     }[m
+[32m+[m
+[32m+[m[32m        //     state.modelName = temp;[m
+[32m+[m[32m        //     console.log(temp);[m
+[32m+[m
+[32m+[m[32m        //     self.onStateChangeCallback(state);[m
+[32m+[m
+[32m+[m[32m        //     console.log('Get IR Temp Data');[m
+[32m+[m[32m        //     return server.getPrimaryService(services[1].uuid)[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(service => {[m
+[32m+[m[32m        //     self.cService = service;[m
+[32m+[m[32m        //     console.log('Temperature Config');[m
+[32m+[m[32m        //     return self.cService.getCharacteristic(characteristics[2].uuid);[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(charConfig => {[m
+[32m+[m[32m        //     console.log('Enable Temperature reading');[m
+[32m+[m[32m        //     var value = new Uint8Array([0x01]);[m
+[32m+[m[32m        //     charConfig.writeValue(value);[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(_ => {[m
+[32m+[m[32m        //     console.log('Retrieve Temperature Data');[m
+[32m+[m[32m        //     return self.cService.getCharacteristic(characteristics[1].uuid);[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .then(charData => {[m
+[32m+[m[32m        //     console.log('Enable notification for temperature');[m
+[32m+[m[32m        //     charData.startNotifications()[m
+[32m+[m[32m        //     .then(_ => {[m
+[32m+[m[32m        //         charData.addEventListener('characteristicvaluechanged', self.handleTempChange);[m
+[32m+[m[32m        //     })[m
+[32m+[m[32m        //     .catch(error => {[m
+[32m+[m[32m        //         console.trace('Error: ' + error);[m
+[32m+[m[32m        //     });[m
+[32m+[m[32m        // })[m
+[32m+[m[32m        // .catch(error => {[m
+[32m+[m[32m        //     console.trace('Error: ' + error);[m
+[32m+[m[32m        // });[m
+     }[m
+ [m
+     getIRTemperature(server, service, chars) {[m
+[31m-        console.log('Get IR Temp Data')[m
+[32m+[m[32m        console.log('Get IR Temp Data');[m
+         server.getPrimaryService(service.uuid)[m
+         .then(service => {[m
+             self.cService = service;[m
+[31m-            console.log('Enable Temperature scanning');[m
+[32m+[m[32m            console.log('Temperature Config');[m
+             return self.cService.getCharacteristic(chars[1].uuid);[m
+         })[m
+         .then(charConfig => {[m
+[32m+[m[32m            console.log('Enable Temperature reading');[m
+             var value = new Uint8Array([0x01]);[m
+             return charConfig.writeValue(value);[m
+         })[m
+[36m@@ -125,19 +180,19 @@[m [mclass TISensorTag {[m
+         })[m
+         .then(charData => {[m
+             console.log('Enable notification for temperature');[m
+[31m-            charData.startNotifications().then(_ => {[m
+[32m+[m[32m            charData.startNotifications()[m
+[32m+[m[32m            .then(_ => {[m
+                 charData.addEventListener('characteristicvaluechanged', self.handleTempChange);[m
+             });[m
+         })[m
+         .catch(error => {[m
+             console.trace('Error: ' + error);[m
+[31m-        })[m
+[31m-        [m
+[32m+[m[32m        });[m
+     }[m
+ [m
+     getModelName(server, service, char) {[m
+[31m-        console.log('Get Model Name')[m
+[31m-        server.getPrimaryService(service.uuid)[m
+[32m+[m[32m        console.log('Get Model Name');[m
+[32m+[m[32m        return server.getPrimaryService(service.uuid)[m
+         .then(service => {[m
+             return service.getCharacteristic(char.uuid);[m
+         })[m

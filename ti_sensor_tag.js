@@ -106,8 +106,6 @@ class TISensorTag {
         // May be something is wrong here
         // self.getModelName(server, services[0], characteristics[0]);
         self.getIRTemperature(server, services[1], characteristics.slice(1));
-
-        
         // return server.getPrimaryService(services[0].uuid)
         // .then(service => {
         //     console.log('Get Model Name');
@@ -165,8 +163,8 @@ class TISensorTag {
         console.log('Get IR Temp Data');
         server.getPrimaryService(service.uuid)
         .then(service => {
+            consolelog('Temperature Config');
             self.cService = service;
-            console.log('Temperature Config');
             return self.cService.getCharacteristic(chars[1].uuid);
         })
         .then(charConfig => {
