@@ -1,6 +1,6 @@
 /**
  * @author Trieu Vi Tran - 15800120
- * @version 0.2.0
+ * @version 1.0.0
  */
 
  /**
