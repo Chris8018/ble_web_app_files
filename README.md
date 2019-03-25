@@ -1,1 +1,1 @@
-# ti_sensor_site
+# TI Sensortag - Motion sensor on Web bluetooth
