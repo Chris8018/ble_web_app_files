@@ -57,8 +57,8 @@ class MotionSensor {
             console.log('Connect to server');
             self.server = server;
             self.getServices(self.server, [self.services.motion.uuid],
-                [self.characteristics.data.uuid, self.characteristics.config.uuid,
-                    self.characteristics.period.uuid]);
+                [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                    self.characteristics.motion.period.uuid]);
         })
         .catch(error => {
             console.trace('Error: ' + error);
@@ -82,7 +82,7 @@ class MotionSensor {
     }
 
     getServices(server, services, characteristics) {
-        getMotion(server, services[0], characteristics[0], characteristics[1], characteristics[2]);
+        self.getMotion(server, services[0], characteristics[0], characteristics[1], characteristics[2]);
     }
 
     getMotion(server, service, dataChar, configChar, periodChar) {
@@ -148,27 +148,27 @@ class MotionSensor {
         // 16 bytes
         let raw_data = event.target.value;
 
-        var gyroData;
+        var gyroData = {};
 
-        gyroData.x = gyroConvert(combineRawData(raw_data.getUint8(0).toString(16), raw_data.getUint8(1).toString(16)));
-        gyroData.y = gyroConvert(combineRawData(raw_data.getUint8(2).toString(16), raw_data.getUint8(3).toString(16)));
-        gyroData.z = gyroConvert(combineRawData(raw_data.getUint8(4).toString(16), raw_data.getUint8(5).toString(16)));
+        gyroData.x = self.gyroConvert(self.combineRawData(raw_data.getUint8(0).toString(16), raw_data.getUint8(1).toString(16)));
+        gyroData.y = self.gyroConvert(self.combineRawData(raw_data.getUint8(2).toString(16), raw_data.getUint8(3).toString(16)));
+        gyroData.z = self.gyroConvert(self.combineRawData(raw_data.getUint8(4).toString(16), raw_data.getUint8(5).toString(16)));
 
         state.gyroData = gyroData;
 
-        var accData;
+        var accData = {};
 
-        accData.x = accConvert(combineRawData(raw_data.getUint8(6).toString(16), raw_data.getUint8(7).toString(16)));
-        accData.y = accConvert(combineRawData(raw_data.getUint8(8).toString(16), raw_data.getUint8(9).toString(16)));
-        accData.z = accConvert(combineRawData(raw_data.getUint8(10).toString(16), raw_data.getUint8(11).toString(16)));
+        accData.x = self.accConvert(self.combineRawData(raw_data.getUint8(6).toString(16), raw_data.getUint8(7).toString(16)));
+        accData.y = self.accConvert(self.combineRawData(raw_data.getUint8(8).toString(16), raw_data.getUint8(9).toString(16)));
+        accData.z = self.accConvert(self.combineRawData(raw_data.getUint8(10).toString(16), raw_data.getUint8(11).toString(16)));
 
         state.accData = accData;
 
-        var magData;
+        var magData = {};
 
-        magData.x = magConvert(combineRawData(raw_data.getUint8(12).toString(16), raw_data.getUint8(13).toString(16)));
-        magData.y = magConvert(combineRawData(raw_data.getUint8(14).toString(16), raw_data.getUint8(15).toString(16)));
-        magData.z = magConvert(combineRawData(raw_data.getUint8(16).toString(16), raw_data.getUint8(17).toString(16)));
+        magData.x = self.magConvert(self.combineRawData(raw_data.getUint8(12).toString(16), raw_data.getUint8(13).toString(16)));
+        magData.y = self.magConvert(self.combineRawData(raw_data.getUint8(14).toString(16), raw_data.getUint8(15).toString(16)));
+        magData.z = self.magConvert(self.combineRawData(raw_data.getUint8(16).toString(16), raw_data.getUint8(17).toString(16)));
 
         state.magData = magData;
 
