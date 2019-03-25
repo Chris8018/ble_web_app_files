@@ -43,6 +43,7 @@ class MotionSensor {
         self = this;
         this.services = services;
         this.characteristics = characteristics;
+        this.accRange;
     }
 
     connect() {
@@ -113,6 +114,7 @@ class MotionSensor {
             //             Accelerometer range (0 (00)=2G, 1 (01)=4G, 2 (10)=8G, 3 (11)=16G)
 
             console.log('Get Motion Config');
+            self.accRange = 0;
             let value = new Uint8Array([0b01111111,0b00000000]);
             config.writeValue(value);
         })
@@ -133,8 +135,82 @@ class MotionSensor {
     }
 
     handleMotion() {
-        // code
+        /* GyroX[0:7], GyroX[8:15],
+        GyroY[0:7], GyroY[8:15],
+        GyroZ[0:7], GyroZ[8:15],
+        AccX[0:7], AccX[8:15],
+        AccY[0:7], AccY[8:15],
+        AccZ[0:7], AccZ[8:15],
+        MagX[0:7], MagX[8:15],
+        MagY[0:7], MagY[8:15],
+        MagZ[0:7], MagZ[8:15] */
+
+        // 16 bytes
         let raw_data = event.target.value;
+
+        var gyroData;
+
+        gyroData.x = gyroConvert(combineRawData(raw_data.getUint8(0).toString(16), raw_data.getUint8(1).toString(16)));
+        gyroData.y = gyroConvert(combineRawData(raw_data.getUint8(2).toString(16), raw_data.getUint8(3).toString(16)));
+        gyroData.z = gyroConvert(combineRawData(raw_data.getUint8(4).toString(16), raw_data.getUint8(5).toString(16)));
+
+        state.gyroData = gyroData;
+
+        var accData;
+
+        accData.x = accConvert(combineRawData(raw_data.getUint8(6).toString(16), raw_data.getUint8(7).toString(16)));
+        accData.y = accConvert(combineRawData(raw_data.getUint8(8).toString(16), raw_data.getUint8(9).toString(16)));
+        accData.z = accConvert(combineRawData(raw_data.getUint8(10).toString(16), raw_data.getUint8(11).toString(16)));
+
+        state.accData = accData;
+
+        var magData;
+
+        magData.x = magConvert(combineRawData(raw_data.getUint8(12).toString(16), raw_data.getUint8(13).toString(16)));
+        magData.y = magConvert(combineRawData(raw_data.getUint8(14).toString(16), raw_data.getUint8(15).toString(16)));
+        magData.z = magConvert(combineRawData(raw_data.getUint8(16).toString(16), raw_data.getUint8(17).toString(16)));
+
+        state.magData = magData;
+
+        self.onStateChangeCallback(state);
+    }
+
+    gyroConvert(data) {
+        // Calculate rotation, unit deg/s, range -250, +250
+        return (data * 1.0) / (65536 / 500);
+    }
+
+    accConvert(data) {
+        var v;
+ 
+        switch (self.accRange) {
+        case 0:
+            //-- calculate acceleration, unit G, range -2, +2
+            v = (data * 1.0) / (32768/2);
+            break;
+        
+        case 1:
+            //-- calculate acceleration, unit G, range -4, +4
+            v = (data * 1.0) / (32768/4);
+            break;
+        
+        case 2:
+            //-- calculate acceleration, unit G, range -8, +8
+            v = (data * 1.0) / (32768/8);
+            break;
+        
+        case 3:
+            //-- calculate acceleration, unit G, range -16, +16
+            v = (data * 1.0) / (32768/16);
+            break;
+        }
+ 
+        return v;
+    }
+
+    magConvert(data) {
+        //-- calculate magnetism, unit uT, range +-4900
+        return 1.0 * data;
     }
 
     combineRawData(data1, data2) {
