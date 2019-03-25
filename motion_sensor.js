@@ -88,17 +88,44 @@ class MotionSensor {
         var pointer;
         server.getPrimaryService(service)
         .then(s => {
+            console.log('Get Motion Service');
             pointer = s;
             return pointer.getCharacteristic(configChar);
         })
         .then(config => {
-            // code
+            // Byte 1:
+            // 0 0 0 0 0 0 0 0
+            // ^ ^ ^ ^ ^ ^ ^ ^
+            // | | | | | | | |
+            // | | | | | | | Gyro Z
+            // | | | | | | Gyro Y
+            // | | | | | Gyro X
+            // | | | | Accel. Z
+            // | | | Accel. Y
+            // | | Accel. X
+            // | Magnetometer (all axes)
+            // Wake up on motion
+
+            // Byte 2:
+            // 0 0 0 0 0 0 0 0
+            //             ^ ^
+            //             | |
+            //             Accelerometer range (0 (00)=2G, 1 (01)=4G, 2 (10)=8G, 3 (11)=16G)
+
+            console.log('Get Motion Config');
+            let value = new Uint8Array([0b01111111,0b00000000]);
+            config.writeValue(value);
         })
         .then(_ => {
+            console.log('Finish writing to config');
             return pointer.getCharacteristic(dataChar);
         })
         .then(data => {
-            // code
+            console.log('Enable notification for Motion');
+            data.startNotifications()
+            .then(_ => {
+                data.addEventListener('characteristicvaluechanged', self.handleMotion);
+            });
         })
         .catch(e => {
             console.trace('Error' + e);
@@ -107,6 +134,18 @@ class MotionSensor {
 
     handleMotion() {
         // code
+        let raw_data = event.target.value;
+    }
+
+    combineRawData(data1, data2) {
+        // data2 + data1
+        if (data1.length < 2)
+            data1 = '0' + data1;
+
+        if (data2.length < 2)
+            data2 = '0' + data2;
+
+        return parseInt('0x' + data2 + data1, 16);
     }
 
     onStateChangeCallback() {}
