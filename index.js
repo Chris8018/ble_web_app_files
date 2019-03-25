@@ -16,20 +16,35 @@
   }
 
   let ti_sensortag;
+  let gyroData;
+  let accData;
+  let magData;
 
   conButton.onclick = e => {
       ti_sensortag = new MotionSensor();
       ti_sensortag.connect();
 
       ti_sensortag.onStateChange(state => {
-          // code
+          gyroData = state.gyroData;
+          accData = state.accData;
+          magData = state.magData;
 
           displayData();
       })
   }
 
   function displayData() {
-      // code
+    document.getElementById('gyroX').innerHTML = gyroData.x;
+    document.getElementById('gyroY').innerHTML = gyroData.y;
+    document.getElementById('gyroZ').innerHTML = gyroData.z;
+
+    document.getElementById('accX').innerHTML = accData.x;
+    document.getElementById('accY').innerHTML = accData.y;
+    document.getElementById('accZ').innerHTML = accData.z;
+
+    document.getElementById('magX').innerHTML = magData.x;
+    document.getElementById('magY').innerHTML = magData.y;
+    document.getElementById('magZ').innerHTML = magData.z;
   }
 
   disButton.onclick = e => {
