@@ -114,8 +114,8 @@ class MotionSensor {
             //             Accelerometer range (0 (00)=2G, 1 (01)=4G, 2 (10)=8G, 3 (11)=16G)
 
             console.log('Get Motion Config');
-            self.accRange = 0;
-            let value = new Uint8Array([0b01111111,0b00000000]);
+            self.accRange = 2;
+            let value = new Uint8Array([0b01111111, 0x00]);
             config.writeValue(value);
         })
         .then(_ => {
@@ -147,7 +147,7 @@ class MotionSensor {
 
         // 16 bytes
         let raw_data = event.target.value;
-        console.log(raw_data);
+        // console.log(raw_data);
 
         var gyroData = {};
 
@@ -174,6 +174,8 @@ class MotionSensor {
 
         state.magData = magData;
 
+        console.table(state);
+
         self.onStateChangeCallback(state);
     }
 
@@ -187,26 +189,26 @@ class MotionSensor {
  
         switch (self.accRange) {
         case 0:
-            console.log('2G');
-            // calculate acceleration, unit G, range -2, +2
+            // console.log('2G');
+            // Calculate acceleration, unit G, range -2, +2
             v = (data * 1.0) / (32768/2);
             break;
         
         case 1:
-            console.log('4G');
-            // calculate acceleration, unit G, range -4, +4
+            // console.log('4G');
+            // Calculate acceleration, unit G, range -4, +4
             v = (data * 1.0) / (32768/4);
             break;
         
         case 2:
-            console.log('6G');
-            // calculate acceleration, unit G, range -8, +8
+            // console.log('6G');
+            // Calculate acceleration, unit G, range -8, +8
             v = (data * 1.0) / (32768/8);
             break;
         
         case 3:
-            console.log('8G');
-            // calculate acceleration, unit G, range -16, +16
+            // console.log('8G');
+            // Calculate acceleration, unit G, range -16, +16
             v = (data * 1.0) / (32768/16);
             break;
         }
@@ -215,7 +217,7 @@ class MotionSensor {
     }
 
     magConvert(data) {
-        //-- calculate magnetism, unit uT, range +-4900
+        // Calculate magnetism, unit uT, range +-4900
         return 1.0 * data;
     }
 
