@@ -147,28 +147,30 @@ class MotionSensor {
 
         // 16 bytes
         let raw_data = event.target.value;
+        console.log(raw_data);
 
         var gyroData = {};
 
-        gyroData.x = self.gyroConvert(self.combineRawData(raw_data.getUint8(0).toString(16), raw_data.getUint8(1).toString(16)));
-        gyroData.y = self.gyroConvert(self.combineRawData(raw_data.getUint8(2).toString(16), raw_data.getUint8(3).toString(16)));
-        gyroData.z = self.gyroConvert(self.combineRawData(raw_data.getUint8(4).toString(16), raw_data.getUint8(5).toString(16)));
+        gyroData.x = self.gyroConvert(raw_data.getInt16(0, true));
+        gyroData.y = self.gyroConvert(raw_data.getInt16(2, true));
+        gyroData.z = self.gyroConvert(raw_data.getInt16(4, true));
+
 
         state.gyroData = gyroData;
 
         var accData = {};
 
-        accData.x = self.accConvert(self.combineRawData(raw_data.getUint8(6).toString(16), raw_data.getUint8(7).toString(16)));
-        accData.y = self.accConvert(self.combineRawData(raw_data.getUint8(8).toString(16), raw_data.getUint8(9).toString(16)));
-        accData.z = self.accConvert(self.combineRawData(raw_data.getUint8(10).toString(16), raw_data.getUint8(11).toString(16)));
+        accData.x = self.accConvert(raw_data.getInt16(6, true));
+        accData.y = self.accConvert(raw_data.getInt16(8, true));
+        accData.z = self.accConvert(raw_data.getInt16(10, true));
 
         state.accData = accData;
 
         var magData = {};
 
-        magData.x = self.magConvert(self.combineRawData(raw_data.getUint8(12).toString(16), raw_data.getUint8(13).toString(16)));
-        magData.y = self.magConvert(self.combineRawData(raw_data.getUint8(14).toString(16), raw_data.getUint8(15).toString(16)));
-        magData.z = self.magConvert(self.combineRawData(raw_data.getUint8(16).toString(16), raw_data.getUint8(17).toString(16)));
+        magData.x = self.magConvert(raw_data.getInt16(12, true));
+        magData.y = self.magConvert(raw_data.getInt16(14, true));
+        magData.z = self.magConvert(raw_data.getInt16(16, true));
 
         state.magData = magData;
 
@@ -185,22 +187,26 @@ class MotionSensor {
  
         switch (self.accRange) {
         case 0:
-            //-- calculate acceleration, unit G, range -2, +2
+            console.log('2G');
+            // calculate acceleration, unit G, range -2, +2
             v = (data * 1.0) / (32768/2);
             break;
         
         case 1:
-            //-- calculate acceleration, unit G, range -4, +4
+            console.log('4G');
+            // calculate acceleration, unit G, range -4, +4
             v = (data * 1.0) / (32768/4);
             break;
         
         case 2:
-            //-- calculate acceleration, unit G, range -8, +8
+            console.log('6G');
+            // calculate acceleration, unit G, range -8, +8
             v = (data * 1.0) / (32768/8);
             break;
         
         case 3:
-            //-- calculate acceleration, unit G, range -16, +16
+            console.log('8G');
+            // calculate acceleration, unit G, range -16, +16
             v = (data * 1.0) / (32768/16);
             break;
         }
@@ -211,17 +217,6 @@ class MotionSensor {
     magConvert(data) {
         //-- calculate magnetism, unit uT, range +-4900
         return 1.0 * data;
-    }
-
-    combineRawData(data1, data2) {
-        // data2 + data1
-        if (data1.length < 2)
-            data1 = '0' + data1;
-
-        if (data2.length < 2)
-            data2 = '0' + data2;
-
-        return parseInt('0x' + data2 + data1, 16);
     }
 
     onStateChangeCallback() {}
