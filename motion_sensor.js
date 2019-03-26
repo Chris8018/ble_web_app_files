@@ -29,8 +29,8 @@ const characteristics = {
 
 let options = {
     // acceptAllDevices: true,
-	filters: [
-            {name: 'CC2650 SensorTag'}
+    filters: [
+        { name: 'CC2650 SensorTag' }
     ],
     optionalServices: [services.motion.uuid]
 };
@@ -48,24 +48,24 @@ class MotionSensor {
 
     connect() {
         return navigator.bluetooth.requestDevice(options)
-        .then(device => {
-            console.log('Found device');
-            self.device = device;
-            return device.gatt.connect();
-        })
-        .then(server => {
-            console.log('Connect to server');
-            self.server = server;
-            // self.getServices(self.server, [self.services.motion.uuid],
-            //     [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
-            //         self.characteristics.motion.period.uuid]);
-            self.getMotion(self.server, self.services.motion.uuid,
-                self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
-                self.characteristics.motion.period.uuid);
-        })
-        .catch(error => {
-            console.trace('Error: ' + error);
-        })
+            .then(device => {
+                console.log('Found device');
+                self.device = device;
+                return device.gatt.connect();
+            })
+            .then(server => {
+                console.log('Connect to server');
+                self.server = server;
+                self.getServices(self.server, [self.services.motion.uuid],
+                    [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                    self.characteristics.motion.period.uuid]);
+                // self.getMotion(self.server, self.services.motion.uuid,
+                //     self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                //     self.characteristics.motion.period.uuid);
+            })
+            .catch(error => {
+                console.trace('Error: ' + error);
+            })
     }
 
     disconnect() {
@@ -90,51 +90,51 @@ class MotionSensor {
 
     getMotion(server, service, dataChar, configChar, periodChar) {
         var pointer;
-        return server.getPrimaryService(service)
-        .then(s => {
-            console.log('Get Motion Service');
-            pointer = s;
-            return pointer.getCharacteristic(configChar);
-        })
-        .then(config => {
-            // Byte 1:
-            // 0 0 0 0 0 0 0 0
-            // ^ ^ ^ ^ ^ ^ ^ ^
-            // | | | | | | | |
-            // | | | | | | | Gyro Z
-            // | | | | | | Gyro Y
-            // | | | | | Gyro X
-            // | | | | Accel. Z
-            // | | | Accel. Y
-            // | | Accel. X
-            // | Magnetometer (all axes)
-            // Wake up on motion
+        server.getPrimaryService(service)
+            .then(s => {
+                console.log('Get Motion Service');
+                pointer = s;
+                return pointer.getCharacteristic(configChar);
+            })
+            .then(config => {
+                // Byte 1:
+                // 0 0 0 0 0 0 0 0
+                // ^ ^ ^ ^ ^ ^ ^ ^
+                // | | | | | | | |
+                // | | | | | | | Gyro Z
+                // | | | | | | Gyro Y
+                // | | | | | Gyro X
+                // | | | | Accel. Z
+                // | | | Accel. Y
+                // | | Accel. X
+                // | Magnetometer (all axes)
+                // Wake up on motion
 
-            // Byte 2:
-            // 0 0 0 0 0 0 0 0
-            //             ^ ^
-            //             | |
-            //             Accelerometer range (0 (00)=2G, 1 (01)=4G, 2 (10)=8G, 3 (11)=16G)
+                // Byte 2:
+                // 0 0 0 0 0 0 0 0
+                //             ^ ^
+                //             | |
+                //             Accelerometer range (0 (00)=2G, 1 (01)=4G, 2 (10)=8G, 3 (11)=16G)
 
-            console.log('Get Motion Config');
-            self.accRange = 2;
-            let value = new Uint8Array([0b01111111, 0x02]);
-            config.writeValue(value);
-        })
-        .then(_ => {
-            console.log('Finish writing to config');
-            return pointer.getCharacteristic(dataChar);
-        })
-        .then(data => {
-            console.log('Enable notification for Motion');
-            data.startNotifications()
+                console.log('Get Motion Config');
+                self.accRange = 2;
+                let value = new Uint8Array([0b01111111, 0x02]);
+                return config.writeValue(value);
+            })
             .then(_ => {
-                data.addEventListener('characteristicvaluechanged', self.handleMotion);
-            });
-        })
-        .catch(e => {
-            console.trace('Error' + e);
-        })
+                console.log('Finish writing to config');
+                return pointer.getCharacteristic(dataChar);
+            })
+            .then(data => {
+                console.log('Enable notification for Motion');
+                data.startNotifications()
+                    .then(_ => {
+                        data.addEventListener('characteristicvaluechanged', self.handleMotion);
+                    });
+            })
+            .catch(e => {
+                console.trace('Error' + e);
+            })
     }
 
     handleMotion(event) {
@@ -189,33 +189,33 @@ class MotionSensor {
 
     accConvert(data) {
         var v;
- 
+
         switch (self.accRange) {
-        case 0:
-            // console.log('2G');
-            // Calculate acceleration, unit G, range -2, +2
-            v = (data * 1.0) / (32768/2);
-            break;
-        
-        case 1:
-            // console.log('4G');
-            // Calculate acceleration, unit G, range -4, +4
-            v = (data * 1.0) / (32768/4);
-            break;
-        
-        case 2:
-            // console.log('8G');
-            // Calculate acceleration, unit G, range -8, +8
-            v = (data * 1.0) / (32768/8);
-            break;
-        
-        case 3:
-            // console.log('16G');
-            // Calculate acceleration, unit G, range -16, +16
-            v = (data * 1.0) / (32768/16);
-            break;
+            case 0:
+                // console.log('2G');
+                // Calculate acceleration, unit G, range -2, +2
+                v = (data * 1.0) / (32768 / 2);
+                break;
+
+            case 1:
+                // console.log('4G');
+                // Calculate acceleration, unit G, range -4, +4
+                v = (data * 1.0) / (32768 / 4);
+                break;
+
+            case 2:
+                // console.log('8G');
+                // Calculate acceleration, unit G, range -8, +8
+                v = (data * 1.0) / (32768 / 8);
+                break;
+
+            case 3:
+                // console.log('16G');
+                // Calculate acceleration, unit G, range -16, +16
+                v = (data * 1.0) / (32768 / 16);
+                break;
         }
- 
+
         return v;
     }
 
@@ -224,9 +224,9 @@ class MotionSensor {
         return 1.0 * data;
     }
 
-    onStateChangeCallback() {}
+    onStateChangeCallback() { }
 
-    onStateChange(callback){
+    onStateChange(callback) {
         self.onStateChangeCallback = callback;
     }
 }

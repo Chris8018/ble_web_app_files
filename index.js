@@ -3,52 +3,58 @@
  * @version 1.0.0
  */
 
- /**
-  * Waiting for site to load before running
-  */
- window.onload = function() {
-  let conButton = document.getElementById('connect');
-  let disButton = document.getElementById('disconnect');
-  
-  // Check if browser support Web bluetooth API
-  if ('bluetooth' in navigator === false) {
-      alert('Browser does not support the Web Bluetooth API');
-  }
+/**
+ * Waiting for site to load before running
+ */
+window.onload = function () {
+    let conButton = document.getElementById('connect');
+    let disButton = document.getElementById('disconnect');
 
-  let ti_sensortag;
-  let gyroData;
-  let accData;
-  let magData;
+    // Check if browser support Web bluetooth API
+    if ('bluetooth' in navigator === false) {
+        alert('Browser does not support the Web Bluetooth API');
+    }
 
-  conButton.onclick = e => {
-      ti_sensortag = new MotionSensor();
-      ti_sensortag.connect();
+    let ti_sensortag;
+    let gyroData;
+    let accData;
+    let magData;
 
-      ti_sensortag.onStateChange(state => {
-          gyroData = state.gyroData;
-          accData = state.accData;
-          magData = state.magData;
+    conButton.onclick = e => {
+        ti_sensortag = new MotionSensor();
+        ti_sensortag.connect();
 
-          displayData();
-      })
-  }
+        ti_sensortag.onStateChange(state => {
+            gyroData = state.gyroData;
+            accData = state.accData;
+            magData = state.magData;
 
-  function displayData() {
-    document.getElementById('gyroX').innerHTML = gyroData.x;
-    document.getElementById('gyroY').innerHTML = gyroData.y;
-    document.getElementById('gyroZ').innerHTML = gyroData.z;
+            displayData();
+        })
+    }
 
-    document.getElementById('accX').innerHTML = accData.x;
-    document.getElementById('accY').innerHTML = accData.y;
-    document.getElementById('accZ').innerHTML = accData.z;
+    function displayData() {
 
-    document.getElementById('magX').innerHTML = magData.x;
-    document.getElementById('magY').innerHTML = magData.y;
-    document.getElementById('magZ').innerHTML = magData.z;
-  }
+        if (gyroData) {
+            document.getElementById('gyroX').innerHTML = gyroData.x;
+            document.getElementById('gyroY').innerHTML = gyroData.y;
+            document.getElementById('gyroZ').innerHTML = gyroData.z;
+        }
 
-  disButton.onclick = e => {
-      ti_sensortag.disconnect();
-  }
+        if (accData) {
+            document.getElementById('accX').innerHTML = accData.x;
+            document.getElementById('accY').innerHTML = accData.y;
+            document.getElementById('accZ').innerHTML = accData.z;
+        }
+
+        if (magData) {
+            document.getElementById('magX').innerHTML = magData.x;
+            document.getElementById('magY').innerHTML = magData.y;
+            document.getElementById('magZ').innerHTML = magData.z;
+        }
+    }
+
+    disButton.onclick = e => {
+        ti_sensortag.disconnect();
+    }
 }
-  
