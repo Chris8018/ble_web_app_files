@@ -56,9 +56,12 @@ class MotionSensor {
         .then(server => {
             console.log('Connect to server');
             self.server = server;
-            self.getServices(self.server, [self.services.motion.uuid],
-                [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
-                    self.characteristics.motion.period.uuid]);
+            // self.getServices(self.server, [self.services.motion.uuid],
+            //     [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+            //         self.characteristics.motion.period.uuid]);
+            self.getMotion(self.server, self.services.motion.uuid,
+                self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                self.characteristics.motion.period.uuid);
         })
         .catch(error => {
             console.trace('Error: ' + error);
