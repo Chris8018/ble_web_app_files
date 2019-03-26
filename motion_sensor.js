@@ -90,7 +90,7 @@ class MotionSensor {
 
     getMotion(server, service, dataChar, configChar, periodChar) {
         var pointer;
-        server.getPrimaryService(service)
+        return server.getPrimaryService(service)
         .then(s => {
             console.log('Get Motion Service');
             pointer = s;
@@ -137,7 +137,7 @@ class MotionSensor {
         })
     }
 
-    handleMotion() {
+    handleMotion(event) {
         /* GyroX[0:7], GyroX[8:15],
         GyroY[0:7], GyroY[8:15],
         GyroZ[0:7], GyroZ[8:15],
