@@ -115,7 +115,7 @@ class MotionSensor {
 
             console.log('Get Motion Config');
             self.accRange = 2;
-            let value = new Uint8Array([0b01111111, 0x00]);
+            let value = new Uint8Array([0b01111111, 0x02]);
             config.writeValue(value);
         })
         .then(_ => {
@@ -201,13 +201,13 @@ class MotionSensor {
             break;
         
         case 2:
-            // console.log('6G');
+            // console.log('8G');
             // Calculate acceleration, unit G, range -8, +8
             v = (data * 1.0) / (32768/8);
             break;
         
         case 3:
-            // console.log('8G');
+            // console.log('16G');
             // Calculate acceleration, unit G, range -16, +16
             v = (data * 1.0) / (32768/16);
             break;
