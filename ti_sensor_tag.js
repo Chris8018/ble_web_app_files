@@ -168,15 +168,22 @@ class TISensorTag {
         // data = parseInt('0x' + v1.toString(16) + v2.toString(16), 16)
         // result = (t >> 2 & 0x3FFF) * 0.03125
         let raw_data = event.target.value;
-        console.log(raw_data);
+        //console.log(raw_data);
 
-        let temp1 = raw_data.getUint8(3).toString(16);
-        temp1 = temp1.length < 2 ? '0' + temp1 : temp1;
+        //let temp1 = raw_data.getUint8(3).toString(16);
+        //temp1 = temp1.length < 2 ? '0' + temp1 : temp1;
 
-        let temp2 = raw_data.getUint8(2).toString(16);
-        temp2 = temp2.length < 2 ? '0' + temp2 : temp2;
+        //let temp2 = raw_data.getUint8(2).toString(16);
+        //temp2 = temp2.length < 2 ? '0' + temp2 : temp2;
 
-        let raw_ambient_temp = parseInt('0x' + temp1 + temp2, 16);
+        //let raw_ambient_temp = parseInt('0x' + temp1 + temp2, 16);
+		//console.log(raw_ambient_temp);
+		
+		//let d1 = raw_data.getUint8(2);
+		//let d2 = raw_data.getUint8(3);
+		
+		//let raw_ambient_temp = (d2 << 8) | d1;
+		let raw_ambient_temp = raw_data.getUint16(2, true);
         let ambient_temp_int = raw_ambient_temp >> 2 & 0x3FFF;
         let resultC = ambient_temp_int * 0.03125;
         
