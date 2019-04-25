@@ -122,6 +122,15 @@ class MotionSensor {
                 return config.writeValue(value);
             })
             .then(_ => {
+                //code
+                console.log('Change period to ' + 1 + 'ms');
+                return pointer.getCharacteristic(periodChar);
+            })
+            .then(period => {
+                let value = new Uint8Array([0x0A]);
+                return period.writeValue(value);
+            })
+            .then(_ => {
                 console.log('Finish writing to config');
                 return pointer.getCharacteristic(dataChar);
             })
