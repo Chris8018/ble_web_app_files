@@ -31,6 +31,8 @@ window.onload = function () {
                 gyroDataReal1.push(state.gyroData);
                 accDataReal1.push(state.accData);
 
+                smoothingData1();
+
                 displayData1();
             })
         } else {
@@ -40,7 +42,8 @@ window.onload = function () {
     }
 
     function displayData1() {
-        let tempGyro = gyroDataReal1[gyroDataReal1.length - 1];
+        // let tempGyro = gyroDataReal1[gyroDataReal1.length - 1];
+        let tempGyro = gyroDataSmoothed1[gyroDataSmoothed1.length - 1];
 
         if (tempGyro) {
             document.getElementById('gyroX1').innerHTML = tempGyro.x;
@@ -48,12 +51,39 @@ window.onload = function () {
             document.getElementById('gyroZ1').innerHTML = tempGyro.z;
         }
 
-        let tempAcc = accDataReal1[accDataReal1.length - 1];
+        // let tempAcc = accDataReal1[accDataReal1.length - 1];
+        let tempAcc = accDataSmothed1[accDataSmothed1.length - 1];
 
         if (tempAcc) {
             document.getElementById('accX1').innerHTML = tempAcc.x;
             document.getElementById('accY1').innerHTML = tempAcc.y;
             document.getElementById('accZ1').innerHTML = tempAcc.z;
+        }
+    }
+
+    function smoothingData1() {
+        // Average filter by n
+        var n = 5;
+        if (gyroDataReal1.length < 5) {
+            gyroDataSmoothed1.push(gyroDataReal1[gyroDataReal1.length - 1]);
+        } else {
+            var tempGyro = gyroDataReal1.slice(-n);
+            var tempX = tempGyro.reduce((a, v) => a + v.x);
+            var tempY = tempGyro.reduce((a, v) => a + v.y);;
+            var tempZ = tempGyro.reduce((a, v) => a + v.z);;
+
+            gyroDataSmoothed1.push({x: tempX, y: tempY, z: tempZ});
+        }
+
+        if (accDataReal1.length < 5) {
+            accDataSmothed1.push(accDataReal1[accDataReal1.length - 1]);
+        } else {
+            var tempAcc = accDataReal1.slice(-n);
+            var tempX = tempAcc.reduce((a, v) => a + v.x);
+            var tempY = tempAcc.reduce((a, v) => a + v.y);;
+            var tempZ = tempAcc.reduce((a, v) => a + v.z);;
+
+            accDataSmothed1.push({x: tempX, y: tempY, z: tempZ});
         }
     }
 
@@ -89,7 +119,8 @@ window.onload = function () {
     }
 
     function displayData2() {
-        let tempGyro = gyroDataReal2[gyroDataReal2.length - 1];
+        // let tempGyro = gyroDataReal2[gyroDataReal2.length - 1];
+        let tempGyro = gyroDataSmoothed2[gyroDataSmoothed2.length - 1];
 
         if (tempGyro) {
             document.getElementById('gyroX2').innerHTML = tempGyro.x;
@@ -97,7 +128,8 @@ window.onload = function () {
             document.getElementById('gyroZ2').innerHTML = tempGyro.z;
         }
 
-        let tempAcc = accDataReal2[accDataReal2.length - 1];
+        // let tempAcc = accDataReal2[accDataReal2.length - 1];
+        let tempAcc = accDataSmoothed2[accDataSmoothed2.length - 1];
 
         if (tempAcc) {
             document.getElementById('accX2').innerHTML = tempAcc.x;
@@ -106,14 +138,35 @@ window.onload = function () {
         }
     }
 
-    function smoothingData() {
-        // implelment
+    function smoothingData2() {
+        // Average filter by n
+        var n = 5;
+        if (gyroDataReal2.length < 5) {
+            gyroDataSmoothed2.push(gyroDataReal2[gyroDataReal2.length - 1]);
+        } else {
+            var tempGyro = gyroDataReal2.slice(-n);
+            var tempX = tempGyro.reduce((a, v) => a + v.x);
+            var tempY = tempGyro.reduce((a, v) => a + v.y);;
+            var tempZ = tempGyro.reduce((a, v) => a + v.z);;
+
+            gyroDataSmoothed2.push({x: tempX, y: tempY, z: tempZ});
+        }
+
+        if (accDataReal2.length < 5) {
+            accDataSmothed2.push(accDataReal2[accDataReal2.length - 1]);
+        } else {
+            var tempAcc = accDataReal2.slice(-n);
+            var tempX = tempAcc.reduce((a, v) => a + v.x);
+            var tempY = tempAcc.reduce((a, v) => a + v.y);;
+            var tempZ = tempAcc.reduce((a, v) => a + v.z);;
+
+            accDataSmothed2.push({x: tempX, y: tempY, z: tempZ});
+        }
     }
 
     let downloadButton= document.getElementById('download');
 
     downloadButton.onclick = e => {
-        // implement
         console.log("Download butoon is clicked");
         console.log('Generating text for download')
         
@@ -122,10 +175,10 @@ window.onload = function () {
             var n = gyroDataReal1.length;
             text += 'Tag 1\n';
             text += generatingText(gyroDataReal1, n, 'gyro');
-            text += generatingText(accDataReal1, 'acc');
+            text += generatingText(accDataReal1, n, 'acc');
         }
         
-        if (ti_sensortag1 !== undefined) {
+        if (ti_sensortag2 !== undefined) {
             var n = gyroDataReal2.length - 1;
             text += 'Tag 2\n';
             text += generatingText(gyroDataReal2, n, 'gyro');
@@ -142,6 +195,9 @@ window.onload = function () {
         fileName += '_' + currentDate.getMinutes();
 
         console.log("Generating download file");
+
+        // Limited to 500MB
+        // Use 3rd party library to donwload bigger file EG: FileSaver.js or StreamSaver.js
         download(fileName + '.txt',text);
 
     }

@@ -48,7 +48,7 @@ class MotionSensor2 {
     }
 
     connect() {
-        if (self2.device === undefined || self2.device === null || !self2.device.connected) {
+        if (self2.device === undefined || !self2.device.connected) {
             return navigator.bluetooth.requestDevice(options)
                 .then(device => {
                     console.log('Found device');
@@ -80,7 +80,7 @@ class MotionSensor2 {
     }
 
     reconnect() {
-        if (self2.device !== undefined && !self2.device.connected && self2.device !== null) {
+        if (self2.device !== undefined && !self2.device.connected) {
             console.log('Reconnect previous device');
             self2.device.connect();
         }
