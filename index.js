@@ -1,6 +1,6 @@
 /**
  * @author Trieu Vi Tran - 15800120
- * @version 1.0.0
+ * @version 3.0
  */
 
 /**
@@ -22,46 +22,39 @@ window.onload = function () {
     let accDataReal1 = [];
     let accDataSmothed1 = [];
 
-    // let magData;
-
     conB1.onclick = e => {
-        ti_sensortag1 = new MotionSensor();
-        ti_sensortag1.connect();
+        if (ti_sensortag1 === undefined || ti_sensortag1 === null) {
+            ti_sensortag1 = new MotionSensor();
+            ti_sensortag1.connect();
 
-        ti_sensortag1.onStateChange(state => {
-            gyroDataReal1.push(state.gyroData);
-            accDataReal1.push(state.accData);
-            // gyroData = state.gyroData;
-            // accData = state.accData;
-            // magData = state.magData;
+            ti_sensortag1.onStateChange(state => {
+                gyroDataReal1.push(state.gyroData);
+                accDataReal1.push(state.accData);
 
-            displayData();
-        })
+                displayData1();
+            })
+        } else {
+            alert("This device is connected")
+            console.log("This device is connected")
+        }
     }
 
-    function displayData() {
+    function displayData1() {
+        let tempGyro = gyroDataReal1[gyroDataReal1.length - 1];
 
-        if (gyroDataReal1.length > 0) {
-            let tempGyro = gyroDataReal1[gyroDataReal1.length - 1];
-            // Data smoothing here
-            document.getElementById('gyroX').innerHTML = tempGyro.x;
-            document.getElementById('gyroY').innerHTML = tempGyro.y;
-            document.getElementById('gyroZ').innerHTML = tempGyro.z;
+        if (tempGyro) {
+            document.getElementById('gyroX1').innerHTML = tempGyro.x;
+            document.getElementById('gyroY1').innerHTML = tempGyro.y;
+            document.getElementById('gyroZ1').innerHTML = tempGyro.z;
         }
 
-        if (accDataReal1.length > 0) {
-            let tempAcc = accDataReal1[accDataReal1.length - 1];
-            // Data smoothing here
-            document.getElementById('accX').innerHTML = tempAcc.x;
-            document.getElementById('accY').innerHTML = tempAcc.y;
-            document.getElementById('accZ').innerHTML = tempAcc.z;
-        }
+        let tempAcc = accDataReal1[accDataReal1.length - 1];
 
-        // if (magData) {
-        //     document.getElementById('magX').innerHTML = magData.x;
-        //     document.getElementById('magY').innerHTML = magData.y;
-        //     document.getElementById('magZ').innerHTML = magData.z;
-        // }
+        if (tempAcc) {
+            document.getElementById('accX1').innerHTML = tempAcc.x;
+            document.getElementById('accY1').innerHTML = tempAcc.y;
+            document.getElementById('accZ1').innerHTML = tempAcc.z;
+        }
     }
 
     disB1.onclick = e => {
@@ -77,6 +70,41 @@ window.onload = function () {
 
     let accDataReal2 = [];
     let accDataSmoothed2 = [];
+
+    conB2.onclick = e => {
+        if (ti_sensortag2 === undefined || ti_sensortag2 === null) {
+            ti_sensortag2 = new MotionSensor2();
+            ti_sensortag2.connect();
+
+            ti_sensortag2.onStateChange(state => {
+                gyroDataReal2.push(state.gyroData);
+                accDataReal2.push(state.accData);
+
+                displayData2();
+            })
+        } else {
+            alert("This device is connected")
+            console.log("This device is connected")
+        }
+    }
+
+    function displayData2() {
+        let tempGyro = gyroDataReal2[gyroDataReal2.length - 1];
+
+        if (tempGyro) {
+            document.getElementById('gyroX2').innerHTML = tempGyro.x;
+            document.getElementById('gyroY2').innerHTML = tempGyro.y;
+            document.getElementById('gyroZ2').innerHTML = tempGyro.z;
+        }
+
+        let tempAcc = accDataReal2[accDataReal2.length - 1];
+
+        if (tempAcc) {
+            document.getElementById('accX2').innerHTML = tempAcc.x;
+            document.getElementById('accY2').innerHTML = tempAcc.y;
+            document.getElementById('accZ2').innerHTML = tempAcc.z;
+        }
+    }
 
     function smoothingData() {
         // implelment
