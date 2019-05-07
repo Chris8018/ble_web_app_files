@@ -114,8 +114,35 @@ window.onload = function () {
 
     downloadButton.onclick = e => {
         // implement
-        console.log("download butoon is clicked");
-        download("hello.txt","This is the content of my file :)");
+        console.log("Download butoon is clicked");
+        console.log('Generating text for download')
+        
+        var text = '';
+        if (ti_sensortag1 !== undefined) {
+            var n = gyroDataReal1.length;
+            text += 'Tag 1\n';
+            text += generatingText(gyroDataReal1, n, 'gyro');
+            text += generatingText(accDataReal1, 'acc');
+        }
+        
+        if (ti_sensortag1 !== undefined) {
+            var n = gyroDataReal2.length - 1;
+            text += 'Tag 2\n';
+            text += generatingText(gyroDataReal2, n, 'gyro');
+            text += generatingText(accDataReal2, n, 'acc');
+        }
+
+        var currentDate = new Date();
+        var fileName = 'motionData';
+        fileName += '_' + currentDate.getDate();
+        fileName += '_' + currentDate.getMonth();
+        fileName += '_' + currentDate.getFullYear();
+
+        fileName += '_' + currentDate.getHours();
+        fileName += '_' + currentDate.getMinutes();
+
+        console.log("Generating download file");
+        download(fileName + '.txt',text);
 
     }
 
@@ -131,12 +158,17 @@ window.onload = function () {
     
         document.body.removeChild(element);
     }
-}
 
-// document.getElementById("dwn-btn").addEventListener("click", function(){
-//     // Generate download of hello.txt file with some content
-//     var text = document.getElementById("text-val").value;
-//     var filename = "hello.txt";
-    
-//     download(filename, text);
-// }, false);
+    function generatingText(data, size, name) {
+        var x = name + 'X';
+        var y = name + 'Y';
+        var z = name + 'Z';
+        for (var i = 0; i < size; i++) {
+            x += ' ' + data[i].x;
+            y += ' ' + data[i].y;
+            z += ' ' + data[i].z;
+        }
+
+        return '\n' + x + '\n' + y + '\n' + z + '\n';
+    }
+}
