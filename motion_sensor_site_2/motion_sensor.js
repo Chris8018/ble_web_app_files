@@ -1,6 +1,6 @@
 /**
  * @author Trieu Vi Tran - 15800120
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 const services = {
@@ -41,31 +41,37 @@ var state = {};
 class MotionSensor {
     constructor() {
         self = this;
+        
         this.services = services;
         this.characteristics = characteristics;
         this.accRange;
     }
 
     connect() {
-        return navigator.bluetooth.requestDevice(options)
-            .then(device => {
-                console.log('Found device');
-                self.device = device;
-                return device.gatt.connect();
-            })
-            .then(server => {
-                console.log('Connect to server');
-                self.server = server;
-                self.getServices(self.server, [self.services.motion.uuid],
-                    [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
-                    self.characteristics.motion.period.uuid]);
-                // self.getMotion(self.server, self.services.motion.uuid,
-                //     self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
-                //     self.characteristics.motion.period.uuid);
-            })
-            .catch(error => {
-                console.trace('Error: ' + error);
-            })
+        if (self.device === undefined || !self.device.connected) {
+            return navigator.bluetooth.requestDevice(options)
+                .then(device => {
+                    console.log('Found device');
+                    self.device = device;
+                    return self.device.gatt.connect();
+                })
+                .then(server => {
+                    console.log('Connect to server');
+                    self.server = server;
+                    self.getServices(self.server, [self.services.motion.uuid],
+                        [self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                        self.characteristics.motion.period.uuid]);
+                    // self.getMotion(self.server, self.services.motion.uuid,
+                    //     self.characteristics.motion.data.uuid, self.characteristics.motion.config.uuid,
+                    //     self.characteristics.motion.period.uuid);
+                })
+                .catch(error => {
+                    console.trace('Error: ' + error);
+                })
+        } else {
+            alert("This device is connected")
+            console.log("This device is connected")
+        }
     }
 
     disconnect() {
@@ -74,7 +80,7 @@ class MotionSensor {
     }
 
     reconnect() {
-        if (self.device !== null) {
+        if (self.device !== undefined && !self.device.connected) {
             console.log('Reconnect previous device');
             self.device.connect();
         }
@@ -122,7 +128,6 @@ class MotionSensor {
                 return config.writeValue(value);
             })
             .then(_ => {
-                //code
                 console.log('Change period to ' + 1 + 'ms');
                 return pointer.getCharacteristic(periodChar);
             })
@@ -186,7 +191,7 @@ class MotionSensor {
 
         state.magData = magData;
 
-        console.table(state);
+        // console.table(state);
 
         self.onStateChangeCallback(state);
     }
