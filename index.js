@@ -88,7 +88,7 @@ window.onload = function () {
     }
 
     disB1.onclick = e => {
-        ti_sensortag.disconnect();
+        ti_sensortag1.disconnect();
     }
 
     let conB2 = document.getElementById('connect2');
@@ -110,12 +110,18 @@ window.onload = function () {
                 gyroDataReal2.push(state.gyroData);
                 accDataReal2.push(state.accData);
 
+                smoothingData2();
+
                 displayData2();
             })
         } else {
             alert("This device is connected")
             console.log("This device is connected")
         }
+    }
+
+    disB2.onclick = e => {
+        ti_sensortag2.disconnect();
     }
 
     function displayData2() {
